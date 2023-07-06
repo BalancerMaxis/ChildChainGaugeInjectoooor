@@ -136,7 +136,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
    */
     function checkExactBalancesMatch() public view returns (bool){
         // iterates through all gauges to make sure there are enough tokens in the contract to fulfill all scheduled tasks
-        // maxperiods - periodnumber * amountPerPeriod ==  token.balanceOf(address(this))
+        // (maxperiods - periodnumber) * amountPerPeriod ==  token.balanceOf(address(this))
 
         address[] memory gaugeList = s_gaugeList;
         uint256 totalDue;
