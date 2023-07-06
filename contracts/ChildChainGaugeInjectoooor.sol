@@ -109,7 +109,8 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
      * @param gaugeAddresses : list of gauge addresses
      * @param amountsPerPeriod : list of amount of token in wei to be injected each week
    */
-    function setValidatedRecipientList(address[] calldata gaugeAddresses,
+    function setValidatedRecipientList(
+        address[] calldata gaugeAddresses,
         uint256[] calldata amountsPerPeriod,
         uint8[] calldata maxPeriods
     ) external onlyOwner {
