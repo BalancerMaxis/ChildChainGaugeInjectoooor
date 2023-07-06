@@ -216,7 +216,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
 
                 SafeERC20.safeApprove(token, ready[idx], target.amountPerPeriod);
 
-                try gauge.deposit_reward_token(address(token), uint256(target.amountPerPeriod)) {
+                try gauge.deposit_reward_token(tokenAddress, uint256(target.amountPerPeriod)) {
                     s_targets[ready[idx]].lastInjectionTimeStamp = uint56(block.timestamp);
                     s_targets[ready[idx]].periodNumber++;
                     emit EmissionsInjection(ready[idx], address(token), target.amountPerPeriod);
