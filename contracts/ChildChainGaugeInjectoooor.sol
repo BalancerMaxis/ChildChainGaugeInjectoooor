@@ -219,7 +219,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
                 try gauge.deposit_reward_token(tokenAddress, uint256(target.amountPerPeriod)) {
                     s_targets[ready[idx]].lastInjectionTimeStamp = uint56(block.timestamp);
                     s_targets[ready[idx]].periodNumber++;
-                    emit EmissionsInjection(ready[idx], address(token), target.amountPerPeriod);
+                    emit EmissionsInjection(ready[idx], tokenAddress, target.amountPerPeriod);
                 } catch {
                     revert("Failed to call deposit_reward_tokens");
                 }
