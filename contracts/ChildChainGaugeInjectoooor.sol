@@ -276,7 +276,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
         }
         uint256 amount = address(this).balance;
         recipient.transfer(amount);
-        emit GasTokenWithdrawn(amount, owner());
+        emit GasTokenWithdrawn(amount, recipient);
     }
 
     /**
