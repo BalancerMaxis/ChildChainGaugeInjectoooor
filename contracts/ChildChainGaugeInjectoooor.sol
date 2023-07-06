@@ -299,8 +299,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
    * @param reward_token Token you are setting the distributor for
    */
     function setDistributorToOwner(address gauge, address reward_token) external onlyOwner {
-        IChildChainGauge gaugeContract = IChildChainGauge(gauge);
-        gaugeContract.set_reward_distributor(reward_token, owner());
+         IChildChainGauge(gauge).set_reward_distributor(reward_token, msg.sender);
     }
 
     /**
