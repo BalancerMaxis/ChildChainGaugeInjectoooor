@@ -77,11 +77,11 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
         if (gaugeAddresses.length != amountsPerPeriod.length || gaugeAddresses.length != maxPeriods.length) {
             revert InvalidGaugeList("supplied gauges are different lengths");
         }
+        revertOnDuplicate(gaugeAddresses);
         address[] memory oldGaugeList = s_gaugeList;
         for (uint256 idx = 0; idx < oldGaugeList.length; idx++) {
             s_targets[oldGaugeList[idx]].isActive = false;
         }
-        revertOnDuplicate(gaugeAddresses);
         for (uint256 idx = 0; idx < gaugeAddresses.length; idx++) {
 
             if (gaugeAddresses[idx] == address(0)) {
