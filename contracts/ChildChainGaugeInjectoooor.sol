@@ -104,7 +104,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     /**
      * @notice Validate that all periods are finished, and that the supplied schedule has the right amount of balance to execute on
      * @notice If everything checks out, update recipient list, otherwise, throw revert
-     * @notice Note: this is griefable by someone transferring funds into the contract,
+     * @notice This is griefable by someone transferring funds into the contract,
      * @notice you can use setRecipientList to set a list without validation
      * @param gaugeAddresses : list of gauge addresses
      * @param amountsPerPeriod : list of amount of token in wei to be injected each week
