@@ -142,7 +142,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
         uint256 totalDue;
         for (uint256 idx = 0; idx < gaugeList.length; idx++) {
             Target memory target = s_targets[gaugeList[idx]];
-            totalDue += (target.maxPeriods - (target.periodNumber)) * target.amountPerPeriod;
+            totalDue += (target.maxPeriods - target.periodNumber) * target.amountPerPeriod;
         }
         return totalDue == IERC20(s_injectTokenAddress).balanceOf(address(this));
     }
