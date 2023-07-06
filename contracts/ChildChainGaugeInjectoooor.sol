@@ -303,7 +303,6 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
 
     /**
    * @notice Manually deposit an amount of tokens to the gauge
-   * @notice
    * @param gauge The Gauge to set distributor to injector owner
    * @param reward_token Reward token you are seeding
    * @param amount Amount to deposit
