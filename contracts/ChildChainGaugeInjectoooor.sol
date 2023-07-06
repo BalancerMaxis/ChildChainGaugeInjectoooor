@@ -30,7 +30,6 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     event SetHandlingToken(address token);
     event PerformedUpkeep(address[] needsFunding);
 
-
     error InvalidGaugeList(string message);
     error OnlyKeeperRegistry(address sender);
     error DuplicateAddress(address duplicate);
