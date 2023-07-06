@@ -21,8 +21,6 @@ import "interfaces/balancer/IChildChainGauge.sol";
  * @notice This contract is Ownable and has lots of sweep functionality to allow the owner to work with the contract or get tokens out should there be a problem.
  * see https://docs.chain.link/chainlink-automation/utility-contracts/
  */
-
-
 contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleInterface {
     event GasTokenWithdrawn(uint256 amountWithdrawn, address recipient);
     event KeeperRegistryAddressUpdated(address oldAddress, address newAddress);
