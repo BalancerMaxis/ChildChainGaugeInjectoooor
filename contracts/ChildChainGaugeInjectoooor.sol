@@ -131,7 +131,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     /**
  * @notice Validate that the balances in the contract match the scheduled periods
      * @notice Used to make sure that balances match schedule
-     * @notice note: this is griefable if others transfer tokens to the contract
+     * @notice This is griefable if others transfer tokens to the contract
    * @return bool true if balance of contract matches scheduled periods
    */
     function checkExactBalancesMatch() public view returns (bool){
