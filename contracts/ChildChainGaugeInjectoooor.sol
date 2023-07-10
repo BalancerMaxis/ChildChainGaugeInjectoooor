@@ -33,6 +33,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     error InvalidGaugeList(string message);
     error OnlyKeeperRegistry(address sender);
     error DuplicateAddress(address duplicate);
+    error PeriodNotFinished(uint256 periodNumber, uint256 maxPeriods);
     error ZeroAddress();
 
     struct Target {
@@ -119,7 +120,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
         for (uint256 idx = 0; idx < gaugeList.length; idx++) {
             Target memory target = s_targets[gaugeList[idx]];
             if (target.periodNumber < target.maxPeriods) {
-                revert("periods not finished");
+                revert PeriodNotFinished(target.periodNumber, target.maxPeriods);
             }
         }
         setRecipientList(gaugeAddresses, amountsPerPeriod, maxPeriods);
@@ -236,10 +237,9 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
         _injectFunds(gauges);
     }
 
-
     /**
-     * @notice Get list of addresses that are ready for new token injections and return keeper-compatible payload
-   * @param performData required by the chainlink interface but not used in this case.
+   * @notice Get list of addresses that are ready for new token injections and return keeper-compatible payload
+   * @param calldata required by the chainlink interface but not used in this case.
    * @return upkeepNeeded signals if upkeep is needed
    * @return performData is an abi encoded list of addresses that need funds
    */
@@ -257,7 +257,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     }
 
     /**
-     * @notice Called by keeper to send funds to underfunded addresses
+   * @notice Called by keeper to send funds to underfunded addresses
    * @param performData The abi encoded list of addresses to fund
    */
     function performUpkeep(bytes calldata performData) external override onlyKeeperRegistry whenNotPaused {
@@ -267,7 +267,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     }
 
     /**
-     * @notice Withdraws the contract balance
+   * @notice Withdraws the contract balance
    */
     function withdrawGasToken() external onlyOwner {
         address payable recipient = payable(owner());
@@ -280,7 +280,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     }
 
     /**
-     * @notice Sweep the full contract's balance for a given ERC-20 token
+   * @notice Sweep the full contract's balance for a given ERC-20 token
    * @param token The ERC-20 token which needs to be swept
    */
     function sweep(address token) external onlyOwner {
@@ -292,14 +292,14 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
 
 
     /**
-     * @notice Set distributor from the injector back to the owner.
-     * @notice You will have to call set_reward_distributor back to the injector FROM the current distributor if you wish to continue using the injector
-     * @notice be aware that the only addresses able to call set_reward_distributor are the current distributor and balancer governance authorized accounts (the LM multisig)
+   * @notice Set distributor from the injector back to the owner.
+   * @notice You will have to call set_reward_distributor back to the injector FROM the current distributor if you wish to continue using the injector
+   * @notice be aware that the only addresses able to call set_reward_distributor are the current distributor and balancer governance authorized accounts (the LM multisig)
    * @param gauge The Gauge to set distributor for
    * @param reward_token Token you are setting the distributor for
    */
     function setDistributorToOwner(address gauge, address reward_token) external onlyOwner {
-         IChildChainGauge(gauge).set_reward_distributor(reward_token, msg.sender);
+        IChildChainGauge(gauge).set_reward_distributor(reward_token, msg.sender);
     }
 
     /**
@@ -317,7 +317,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     }
 
     /**
-     * @notice Sets the keeper registry address
+   * @notice Sets the keeper registry address
    */
     function setKeeperRegistryAddress(address keeperRegistryAddress) public onlyOwner {
         s_keeperRegistryAddress = keeperRegistryAddress;
@@ -325,7 +325,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     }
 
     /**
-     * @notice Sets the minimum wait period (in seconds) for addresses between injections
+   * @notice Sets the minimum wait period (in seconds) for addresses between injections
    */
     function setMinWaitPeriodSeconds(uint256 period) public onlyOwner {
         s_minWaitPeriodSeconds = period;
@@ -333,35 +333,35 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     }
 
     /**
-     * @notice Gets the keeper registry address
+   * @notice Gets the keeper registry address
    */
     function getKeeperRegistryAddress() external view returns (address keeperRegistryAddress) {
         return s_keeperRegistryAddress;
     }
 
     /**
-     * @notice Gets the minimum wait period
+   * @notice Gets the minimum wait period
    */
     function getMinWaitPeriodSeconds() external view returns (uint256) {
         return s_minWaitPeriodSeconds;
     }
 
     /**
-     * @notice Gets the list of addresses on the in the current configuration.
+   * @notice Gets the list of addresses on the in the current configuration.
    */
     function getWatchList() external view returns (address[] memory) {
         return s_gaugeList;
     }
 
     /**
-     * @notice Sets the address of the ERC20 token this contract should handle
+   * @notice Sets the address of the ERC20 token this contract should handle
    */
     function setInjectTokenAddress(address ERC20token) public onlyOwner {
         s_injectTokenAddress = ERC20token;
         emit SetHandlingToken(ERC20token);
     }
     /**
-     * @notice Gets the token this injector is operating on
+   * @notice Gets the token this injector is operating on
    */
     function getInjectTokenAddress() external view returns (address){
         return s_injectTokenAddress;
@@ -374,15 +374,15 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     external
     view
     returns (
-        bool isActive,
         uint256 amountPerPeriod,
+        bool isActive,
         uint8 maxPeriods,
         uint8 periodNumber,
         uint56 lastInjectionTimeStamp
     )
     {
         Target memory target = s_targets[targetAddress];
-        return (target.isActive, target.amountPerPeriod, target.maxPeriods, target.periodNumber, target.lastInjectionTimeStamp);
+        return (target.amountPerPeriod, target.isActive, target.maxPeriods, target.periodNumber, target.lastInjectionTimeStamp);
     }
 
     /**
@@ -404,8 +404,8 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
    */
     function revertOnDuplicate(address[] memory list) internal pure {
         uint256 length = list.length;
-        if(length == 0) {
-           return;
+        if (length == 0) {
+            return;
         }
         for (uint256 i = 0; i < length - 1; i++) {
             for (uint256 j = i + 1; j < length; j++) {
