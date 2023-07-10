@@ -65,7 +65,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     }
 
     /**
-     * @notice Sets the list of addresses to watch and their funding parameters
+   * @notice Sets the list of addresses to watch and their funding parameters
    * @param gaugeAddresses the list of addresses to watch
    * @param amountsPerPeriod the minimum balances for each address
    * @param maxPeriods the amount to top up each address
@@ -131,9 +131,8 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     }
 
     /**
- * @notice Validate that the balances in the contract match the scheduled periods
-     * @notice Used to make sure that balances match schedule
-     * @notice This is griefable if others transfer tokens to the contract
+   * @notice Validate that the balances in the contract match the scheduled periods    * @notice Used to make sure that balances match schedule
+   * @notice This is griefable if others transfer tokens to the contract
    * @return bool true if balance of contract matches scheduled periods
    */
     function checkExactBalancesMatch() public view returns (bool){
@@ -150,8 +149,8 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     }
 
     /**
-     * @notice Gets a list of addresses that are ready to inject
-     * @notice This is done by checking if the current period has ended, and should inject new funds directly after the end of each period.
+   * @notice Gets a list of addresses that are ready to inject
+   * @notice This is done by checking if the current period has ended, and should inject new funds directly after the end of each period.
    * @return list of addresses that are ready to inject
    */
     function getReadyGauges() public view returns (address[] memory) {
@@ -192,7 +191,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     }
 
     /**
-     * @notice Injects funds into the gauges provided
+   * @notice Injects funds into the gauges provided
    * @param ready the list of gauges to fund (addresses must be pre-approved)
    */
     function _injectFunds(address[] memory ready) internal whenNotPaused {
@@ -367,8 +366,8 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
         return s_injectTokenAddress;
     }
     /**
-     * @notice Gets configuration information for an address on the gaugelist
-     * @param targetAddress return Target struct for a given gauge according to the current scheduled distributions
+   * @notice Gets configuration information for an address on the gaugelist
+   * @param targetAddress return Target struct for a given gauge according to the current scheduled distributions
    */
     function getAccountInfo(address targetAddress)
     external
@@ -386,21 +385,21 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     }
 
     /**
-     * @notice Pauses the contract, which prevents executing performUpkeep
+   * @notice Pauses the contract, which prevents executing performUpkeep
    */
     function pause() external onlyOwner {
         _pause();
     }
 
     /**
-     * @notice Unpauses the contract
+   * @notice Unpauses the contract
    */
     function unpause() external onlyOwner {
         _unpause();
     }
 
     /**
-     * @notice takes in a list of addresses and reverts if there is a duplicate
+   * @notice takes in a list of addresses and reverts if there is a duplicate
    */
     function revertOnDuplicate(address[] memory list) internal pure {
         uint256 length = list.length;
