@@ -30,11 +30,14 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     event SetHandlingToken(address token);
     event PerformedUpkeep(address[] needsFunding);
 
-    error InvalidGaugeList(string message);
+    error ListLengthMismatch();
     error OnlyKeeperRegistry(address sender);
     error DuplicateAddress(address duplicate);
     error PeriodNotFinished(uint256 periodNumber, uint256 maxPeriods);
     error ZeroAddress();
+    error ZeroAmount();
+    error BalancesMismatch();
+    error RewardTokenError();
 
     struct Target {
         uint256 amountPerPeriod;
@@ -76,7 +79,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
         uint8[] calldata maxPeriods
     ) public onlyOwner {
         if (gaugeAddresses.length != amountsPerPeriod.length || gaugeAddresses.length != maxPeriods.length) {
-            revert InvalidGaugeList("supplied gauges are different lengths");
+            revert ListLengthMismatch();
         }
         revertOnDuplicate(gaugeAddresses);
         address[] memory oldGaugeList = s_gaugeList;
@@ -86,10 +89,10 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
         for (uint256 idx = 0; idx < gaugeAddresses.length; idx++) {
 
             if (gaugeAddresses[idx] == address(0)) {
-                revert InvalidGaugeList("supplied gauge is 0 address");
+                revert ZeroAddress();
             }
             if (amountsPerPeriod[idx] == 0) {
-                revert InvalidGaugeList("amountPerPeriod cannot be 0");
+                revert ZeroAmount();
             }
             s_targets[gaugeAddresses[idx]] = Target({
                 isActive: true,
@@ -126,7 +129,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
         setRecipientList(gaugeAddresses, amountsPerPeriod, maxPeriods);
 
         if (!checkExactBalancesMatch()) {
-            revert("balance doesn't match for supplied schedules");
+            revert BalancesMismatch();
         }
     }
 
@@ -221,7 +224,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
                     s_targets[ready[idx]].periodNumber++;
                     emit EmissionsInjection(ready[idx], tokenAddress, target.amountPerPeriod);
                 } catch {
-                    revert("Failed to call deposit_reward_tokens");
+                    revert RewardTokenError();
                 }
             }
         }
@@ -238,7 +241,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
 
     /**
    * @notice Get list of addresses that are ready for new token injections and return keeper-compatible payload
-   * @param calldata required by the chainlink interface but not used in this case.
+   * @notice calldata required by the chainlink interface but not used in this case, use 0x
    * @return upkeepNeeded signals if upkeep is needed
    * @return performData is an abi encoded list of addresses that need funds
    */
