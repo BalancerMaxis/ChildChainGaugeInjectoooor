@@ -242,13 +242,13 @@ def test_validatedSuccess(admin, injector, gauge, token, gauge2):
 
     injector.setRecipientList([], [], [], {'from': admin})
     injector.setValidatedRecipientList([gauge,gauge2],[50*10**18,150*10**18],[4,5],{'from':admin})
-    assert injector.checkExactBalancesMatch({'from':admin})
+    assert injector.checkSufficientBalances({'from':admin})
     injector.injectFunds([gauge,gauge2],{'from':admin})
     # sleep 8 days
     chain.sleep(60*60*24*8)
     chain.mine()
     injector.injectFunds([gauge, gauge2],{'from':admin})
-    assert injector.checkExactBalancesMatch({'from':admin})
+    assert injector.checkSufficientBalances({'from':admin})
 
 # tests to make sure checkUpkeepBalance (which gets called on setValidatedRecipient)
 # returns false when sum of scheduled distributions don't add up to current balance
@@ -262,10 +262,10 @@ def test_validatedFail(admin, injector, gauge, token, gauge2):
     injector.setRecipientList([], [], [], {'from': admin})
 
     with brownie.reverts():
-        injector.setValidatedRecipientList([gauge, gauge2], [50 * 10 ** 18, 150 * 10 ** 18], [4, 5], {'from': admin})
+        injector.setValidatedRecipientList([gauge, gauge2], [50 * 10 ** 18, 150 * 10 ** 18], [4, 10], {'from': admin})
 
-    injector.setRecipientList([gauge, gauge2], [50 * 10 ** 18, 150 * 10 ** 18], [4, 5], {'from': admin})
-    assert(injector.checkExactBalancesMatch({'from':admin}) == False)
+    injector.setRecipientList([gauge, gauge2], [50 * 10 ** 18, 150 * 10 ** 18], [4, 10], {'from': admin})
+    assert(injector.checkSufficientBalances({'from':admin}) == False)
 
 
 # add 4 gauges, ru na program, remove them, add osme that are the same,

@@ -37,9 +37,9 @@ The injector uses ERC20 balances in the injector contract to pay rewards.  The u
 The following usage pattern can be followed to maintain proper balances at all times:
 
 #### When setting schedule
-- Use `setValidatedRecipientList(streamerAddresses, amountsPerPeriod, maxPeriods)`
 - Ensure that there is 0 token balance in the contract
 - Transfer the exact amount required for the entire program (all streams, all amounts, all periods)
+- Use `setValidatedRecipientList(streamerAddresses, amountsPerPeriod, maxPeriods)`
 - Do not load the next schedule until the current one is complete.
 
 
