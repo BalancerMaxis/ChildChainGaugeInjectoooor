@@ -105,51 +105,6 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
         s_gaugeList = gaugeAddresses;
     }
 
-    /**
-     * @notice Validate that all periods are finished, and that the supplied schedule has the right amount of balance to execute on
-     * @notice If everything checks out, update recipient list, otherwise, throw revert
-     * @notice This is griefable by someone transferring funds into the contract,
-     * @notice you can use setRecipientList to set a list without validation
-     * @param gaugeAddresses : list of gauge addresses
-     * @param amountsPerPeriod : list of amount of token in wei to be injected each week
-   */
-    function setValidatedRecipientList(
-        address[] calldata gaugeAddresses,
-        uint256[] calldata amountsPerPeriod,
-        uint8[] calldata maxPeriods
-    ) external onlyOwner {
-        address[] memory gaugeList = s_gaugeList;
-        // validate all periods are finished
-        for (uint256 idx = 0; idx < gaugeList.length; idx++) {
-            Target memory target = s_targets[gaugeList[idx]];
-            if (target.periodNumber < target.maxPeriods) {
-                revert PeriodNotFinished(target.periodNumber, target.maxPeriods);
-            }
-        }
-        setRecipientList(gaugeAddresses, amountsPerPeriod, maxPeriods);
-
-        if (!checkExactBalancesMatch()) {
-            revert BalancesMismatch();
-        }
-    }
-
-    /**
-   * @notice Validate that the balances in the contract match the scheduled periods    * @notice Used to make sure that balances match schedule
-   * @notice This is griefable if others transfer tokens to the contract
-   * @return bool true if balance of contract matches scheduled periods
-   */
-    function checkExactBalancesMatch() public view returns (bool){
-        // iterates through all gauges to make sure there are enough tokens in the contract to fulfill all scheduled tasks
-        // (maxperiods - periodnumber) * amountPerPeriod ==  token.balanceOf(address(this))
-
-        address[] memory gaugeList = s_gaugeList;
-        uint256 totalDue;
-        for (uint256 idx = 0; idx < gaugeList.length; idx++) {
-            Target memory target = s_targets[gaugeList[idx]];
-            totalDue += (target.maxPeriods - target.periodNumber) * target.amountPerPeriod;
-        }
-        return totalDue == IERC20(s_injectTokenAddress).balanceOf(address(this));
-    }
 
     /**
    * @notice Gets a list of addresses that are ready to inject
