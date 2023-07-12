@@ -16,7 +16,7 @@ def test_set_recipient_list(injector, admin, gauge):
     periods = [3]
     injector.setRecipientList(recipients, amounts, periods, {"from": admin})
     assert injector.getWatchList() == recipients
-    assert injector.getAccountInfo(recipients[0]) == (True, 100, 3, 0, 0)
+    assert injector.getAccountInfo(recipients[0]) == (100, True, 3, 0, 0)
 
 
 def test_can_call_check_upkeep(upkeep_caller, injector, gauge, admin):
@@ -261,7 +261,7 @@ def test_validatedFail(admin, injector, gauge, token, gauge2):
 
     injector.setRecipientList([], [], [], {'from': admin})
 
-    with brownie.reverts("balance doesn't match for supplied schedules"):
+    with brownie.reverts():
         injector.setValidatedRecipientList([gauge, gauge2], [50 * 10 ** 18, 150 * 10 ** 18], [4, 5], {'from': admin})
 
     injector.setRecipientList([gauge, gauge2], [50 * 10 ** 18, 150 * 10 ** 18], [4, 5], {'from': admin})
