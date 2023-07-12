@@ -28,7 +28,7 @@ List changes are atomic.  A new list replaces an old one.
 
 This list is defined by calling the function `setRecipientList(streamerAddresses, amountsPerPeriod, maxPeriods)` on the deployed injector.
 
-`setValidatedRecipientList(streamerAddresses, amountsPerPeriod, maxPeriods)` can also be called.  It checks that there are running programs that still have periods to pay out, and that the balance in the injector contract is exactly the amount required to pay the full new program.  It will revert if these conditions are not met, and set a new list if they are. 
+`setValidatedRecipientList(streamerAddresses, amountsPerPeriod, maxPeriods)` can also be called.  It checks that there are running programs that still have periods to pay out, and that the balance in the injector contract is sufficient to pay the full new program.  Note that it will not catch if there are too many tokens to prevent griefing, so if you want to keep exact balances you should confirm that the balance is 0 or sweep it before running `setValidatedRecipientList`.  It will revert if these conditions are not met, and set a new list if they are. 
 
 
 ### Balances
@@ -38,8 +38,10 @@ The following usage pattern can be followed to maintain proper balances at all t
 
 #### When setting schedule
 - Use `setValidatedRecipientList(streamerAddresses, amountsPerPeriod, maxPeriods)`
+- Ensure that there is 0 token balance in the contract
 - Transfer the exact amount required for the entire program (all streams, all amounts, all periods)
 - Do not load the next schedule until the current one is complete.
+
 
 #### To abort a schedule midway through or reset
 - Use `setRecipientList([], [], [])` to clear the list.
