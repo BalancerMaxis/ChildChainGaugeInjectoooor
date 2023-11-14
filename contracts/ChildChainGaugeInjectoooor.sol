@@ -22,6 +22,7 @@ import "interfaces/balancer/IChildChainGauge.sol";
  * see https://docs.chain.link/chainlink-automation/utility-contracts/
  */
 contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleInterface {
+
     event GasTokenWithdrawn(uint256 amountWithdrawn, address recipient);
     event KeeperRegistryAddressUpdated(address oldAddress, address newAddress);
     event MinWaitPeriodUpdated(uint256 oldMinWaitPeriod, uint256 newMinWaitPeriod);
@@ -29,6 +30,11 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
     event EmissionsInjection(address gauge, address token, uint256 amount);
     event SetHandlingToken(address token);
     event PerformedUpkeep(address[] needsFunding);
+    event RecipientListUpdated(
+        address[] calldata gaugeAddresses,
+        uint256[] calldata amountsPerPeriod,
+        uint8[] calldata maxPeriods
+    );
 
     error ListLengthMismatch();
     error OnlyKeeperRegistry(address sender);
@@ -46,6 +52,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
         uint8 periodNumber;
         uint56 lastInjectionTimeStamp; // enough space for 2 trillion years
     }
+
 
 
     address private s_keeperRegistryAddress;
@@ -103,6 +110,7 @@ contract ChildChainGaugeInjector is ConfirmedOwner, Pausable, KeeperCompatibleIn
             });
         }
         s_gaugeList = gaugeAddresses;
+        emit RecipientListUpdated(gaugeAddresses, amountsPerPeriod, maxPeriods);
     }
 
     /**
