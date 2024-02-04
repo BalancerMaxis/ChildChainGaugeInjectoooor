@@ -67,7 +67,7 @@ contract ChildChainGaugeInjectorV2 is ConfirmedOwner, Pausable, KeeperCompatible
     address public InjectTokenAddress;
 
     /**
-   * @param keeperAddress The address of the keeper registry contract
+   * @param keeperAddress The address of the keeper contract
    * @param minWaitPeriodSeconds The minimum wait period for address between funding (for security)
    * @param injectTokenAddress The ERC20 token this contract should mange
    * @param maxInjectionAmount The max amount of tokens that should be injectoed to a single gauge in a single week by this injector.
@@ -263,7 +263,7 @@ contract ChildChainGaugeInjectorV2 is ConfirmedOwner, Pausable, KeeperCompatible
    * @notice Called by keeper to send funds to underfunded addresses
    * @param performData The abi encoded list of addresses to fund
    */
-    function performUpkeep(bytes calldata performData) external override onlyKeeperRegistry whenNotPaused {
+    function performUpkeep(bytes calldata performData) external override onlyKeeper whenNotPaused {
         address[] memory needsFunding = abi.decode(performData, (address[]));
         _injectFunds(needsFunding);
         emit PerformedUpkeep(needsFunding);
@@ -350,7 +350,7 @@ contract ChildChainGaugeInjectorV2 is ConfirmedOwner, Pausable, KeeperCompatible
     }
 
     /**
-   * @notice Sets the keeper registry address
+   * @notice Sets the keeper  address
    */
     function setKeeperAddress(address keeperAddress) public onlyOwner {
         emit KeeperRegistryAddressUpdated(KeeperAddress, keeperAddress);
@@ -414,7 +414,7 @@ contract ChildChainGaugeInjectorV2 is ConfirmedOwner, Pausable, KeeperCompatible
         // No duplicates found
     }
 
-    modifier onlyKeeperRegistry() {
+    modifier onlyKeeper() {
         if (msg.sender != KeeperAddress) {
             revert OnlyKeeper(msg.sender);
         }
