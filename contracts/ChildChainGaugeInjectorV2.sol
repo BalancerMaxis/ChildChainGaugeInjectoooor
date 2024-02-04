@@ -37,7 +37,7 @@ contract ChildChainGaugeInjectorV2 is ConfirmedOwner, Pausable, KeeperCompatible
 
 
     error ListLengthMismatch();
-    error OnlyKeeperRegistry(address sender);
+    error OnlyKeeper(address sender);
     error DuplicateAddress(address duplicate);
     error PeriodNotFinished(uint256 periodNumber, uint256 maxPeriods);
     error ZeroAddress();
@@ -416,7 +416,7 @@ contract ChildChainGaugeInjectorV2 is ConfirmedOwner, Pausable, KeeperCompatible
 
     modifier onlyKeeperRegistry() {
         if (msg.sender != KeeperAddress) {
-            revert OnlyKeeperRegistry(msg.sender);
+            revert OnlyKeeper(msg.sender);
         }
         _;
     }
