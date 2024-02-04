@@ -140,9 +140,6 @@ contract ChildChainGaugeInjectorV2 is ConfirmedOwner, Pausable, KeeperCompatible
    * @return delta is 0 if balances match, negative if injector balance is in deficit to service all loaded programs, and positive if there is a surplus.
    */
     function getBalanceDelta() public view returns (int256 delta){
-        // iterates through all gauges to make sure there are enough tokens in the contract to fulfill all scheduled tasks
-        // (maxperiods - periodnumber) * amountPerPeriod ==  token.balanceOf(address(this))
-
         address[] memory gaugeList = getActiveGaugeList();
         uint256 totalDue;
         for (uint256 idx = 0; idx < gaugeList.length; idx++) {
@@ -334,7 +331,7 @@ contract ChildChainGaugeInjectorV2 is ConfirmedOwner, Pausable, KeeperCompatible
     }
 
     /**
-   * @notice Gets configuration information for an address on the gaugelist
+   * @notice Gets configuration information for an address on the gauge list
    * @param targetAddress return Target struct for a given gauge according to the current scheduled distributions
    */
     function getGaugeInfo(address targetAddress)
