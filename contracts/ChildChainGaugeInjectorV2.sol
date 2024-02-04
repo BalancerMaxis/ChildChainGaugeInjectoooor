@@ -23,6 +23,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
  */
 contract ChildChainGaugeInjectorV2 is ConfirmedOwner, Pausable, KeeperCompatibleInterface {
     using EnumerableSet for EnumerableSet.AddressSet;
+
     event GasTokenWithdrawn(uint256 amountWithdrawn, address recipient);
     event KeeperRegistryAddressUpdated(address oldAddress, address newAddress);
     event MinWaitPeriodUpdated(uint256 oldMinWaitPeriod, uint256 newMinWaitPeriod);
@@ -33,6 +34,8 @@ contract ChildChainGaugeInjectorV2 is ConfirmedOwner, Pausable, KeeperCompatible
     event PerformedUpkeep(address[] needsFunding);
     event RecipientAdded(address gaugeAddress, uint256 amountPerPeriod, uint256 maxPeriods, uint256 periodsExecutedLastProgram, bool seenBefore);
     event RecipientRemoved(address gaugeAddress);
+
+
     error ListLengthMismatch();
     error OnlyKeeperRegistry(address sender);
     error DuplicateAddress(address duplicate);
@@ -93,7 +96,7 @@ contract ChildChainGaugeInjectorV2 is ConfirmedOwner, Pausable, KeeperCompatible
             revert PaymentAmountOverGlobalMax(recipients[0], amountPerPeriod, MaxInjectionAmount);
         }
 
-        for (uint i = 0; i < recipients.length; i++)  {
+        for (uint i = 0; i < recipients.length; i++) {
             // Check that this is a gauge and it is ready for us to inject to it
             IChildChainGauge gauge = IChildChainGauge(recipients[i]);
             if (gauge.reward_data(InjectTokenAddress).distributor != address(this)) {
@@ -104,7 +107,7 @@ contract ChildChainGaugeInjectorV2 is ConfirmedOwner, Pausable, KeeperCompatible
             update = ActiveGauges.add(recipients[i]);
             executedPeriods = 0;
 
-            if(!update && GaugeConfigs[recipients[i]].isActive) {
+            if (!update && GaugeConfigs[recipients[i]].isActive) {
                 executedPeriods = GaugeConfigs[recipients[i]].periodNumber;
             }
             Target memory target;
@@ -231,8 +234,8 @@ contract ChildChainGaugeInjectorV2 is ConfirmedOwner, Pausable, KeeperCompatible
         }
     }
 
-     /**
-    *  @notice This is to allow the owner to manually trigger an injection of funds in place of the keeper
+    /**
+   *  @notice This is to allow the owner to manually trigger an injection of funds in place of the keeper
     * @notice without abi encoding the gauge list
     * @param gauges array of gauges to inject tokens to
     */
@@ -318,8 +321,8 @@ contract ChildChainGaugeInjectorV2 is ConfirmedOwner, Pausable, KeeperCompatible
         emit EmissionsInjection(gauge, reward_token, amount);
     }
 
-   /**
-   * @notice Return a list of active gauges
+    /**
+    * @notice Return a list of active gauges
    */
     function getActiveGaugeList() public view returns (address[] memory activeGauges) {
         uint256 len = ActiveGauges.length();
@@ -365,17 +368,14 @@ contract ChildChainGaugeInjectorV2 is ConfirmedOwner, Pausable, KeeperCompatible
         MinWaitPeriodSeconds = period;
     }
 
-
-
-   /**
-   * @notice Sets global MaxInjectionAmount for the injector
+    /**
+    * @notice Sets global MaxInjectionAmount for the injector
    * @param amount The max amount that the injector will allow to be paid to a single gauge in single programmed injection
    */
-    function setMaxInjectionAmount(uint256 amount) public onlyOwner{
+    function setMaxInjectionAmount(uint256 amount) public onlyOwner {
         emit MaxInjectionAmountUpdated(MaxInjectionAmount, amount);
         MaxInjectionAmount = amount;
     }
-
 
     /**
    * @notice Sets the address of the ERC20 token this contract should handle
@@ -384,8 +384,6 @@ contract ChildChainGaugeInjectorV2 is ConfirmedOwner, Pausable, KeeperCompatible
         InjectTokenAddress = ERC20token;
         emit SetHandlingToken(ERC20token);
     }
-
-
 
     /**
    * @notice Pauses the contract, which prevents executing performUpkeep
