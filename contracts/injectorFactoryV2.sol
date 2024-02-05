@@ -35,13 +35,12 @@ contract ChildChainGaugeInjectorV2Factory {
     ) external returns (address) {
         address injector = Clones.clone(implementation);
         ChildChainGaugeInjectorV2(injector).initialize(
+            owner,
             keeperAddress,
             minWaitPeriodSeconds,
             injectTokenAddress,
-            maxInjectionAmount,
-            owner
+            maxInjectionAmount
         );
-
         emit InjectorCreated(injector);
         return injector;
     }
