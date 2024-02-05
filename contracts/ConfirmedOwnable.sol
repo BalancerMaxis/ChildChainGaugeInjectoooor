@@ -13,7 +13,7 @@ contract ConfirmableOwnable is Ownable {
         _;
     }
 
-    function proxyProposeFirstOwner(address _initialOwner) public  {
+    function proxyProposeFirstOwner(address _initialOwner) internal  {
         require(_initialOwner != address(0), "Invalid initial owner");
         require(proposedOwner == address(0), "Initial Owner Already Set");
         proposedOwner = _initialOwner;
