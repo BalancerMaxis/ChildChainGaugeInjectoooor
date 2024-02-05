@@ -2,14 +2,13 @@
 
 pragma solidity ^0.8.21;
 
-import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
+import "./ConfirmedOwnable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "interfaces/balancer/IChildChainGauge.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 /**
  * @title The ChildChainGaugeInjector Contract
  * @author 0xtritium.eth + master coder Mike B
@@ -22,9 +21,9 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
  * see https://docs.chain.link/chainlink-automation/utility-contracts/
  */
 contract ChildChainGaugeInjectorV2 is
-    ConfirmedOwner,
+    ConfirmableOwnable,
     Pausable,
-    KeeperCompatibleInterface
+    Initializable
 {
     using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -48,7 +47,6 @@ contract ChildChainGaugeInjectorV2 is
     );
     event RecipientRemoved(address gaugeAddress);
     event InjectorInitialized(
-        address owner,
         address keeperAddress,
         uint256 minWaitPeriodSeconds,
         address injectTokenAddress,
@@ -86,14 +84,7 @@ contract ChildChainGaugeInjectorV2 is
     uint256 public MaxInjectionAmount;
     uint256 public MinWaitPeriodSeconds;
     address public InjectTokenAddress;
-    bool private Initialized;
-    modifier onlyUninitialized() {
-        require(!Initialized, "Contract already initialized");
-        _;
-        Initialized = true;
-    }
-    // Owner is overriden by initialize
-    constructor() ConfirmedOwner(msg.sender) {}
+
     /**
      * @notice Initializes the ChildChainGaugeInjector logic contract.
      * @param keeperAddress The address of the keeper contract
@@ -103,19 +94,18 @@ contract ChildChainGaugeInjectorV2 is
      */
 
     function initialize(
+        address owner,
         address keeperAddress,
         uint256 minWaitPeriodSeconds,
         address injectTokenAddress,
-        uint256 maxInjectionAmount,
-        address owner
-    ) public onlyUninitialized {
-        transferOwnership(owner);
-        setKeeperAddress(keeperAddress);
-        setMinWaitPeriodSeconds(minWaitPeriodSeconds);
-        setInjectTokenAddress(injectTokenAddress);
-        setMaxInjectionAmount(maxInjectionAmount);
+        uint256 maxInjectionAmount
+    ) external initializer  {
+        proxyProposeFirstOwner(owner);
+        KeeperAddress = keeperAddress;
+        MinWaitPeriodSeconds = minWaitPeriodSeconds;
+        InjectTokenAddress = injectTokenAddress;
+        MaxInjectionAmount = maxInjectionAmount;
         emit InjectorInitialized(
-            owner,
             keeperAddress,
             minWaitPeriodSeconds,
             injectTokenAddress,
@@ -342,7 +332,6 @@ contract ChildChainGaugeInjectorV2 is
     )
         external
         view
-        override
         whenNotPaused
         returns (bool upkeepNeeded, bytes memory performData)
     {
@@ -358,7 +347,7 @@ contract ChildChainGaugeInjectorV2 is
      */
     function performUpkeep(
         bytes calldata performData
-    ) external override onlyKeeper whenNotPaused {
+    ) external  onlyKeeper whenNotPaused {
         address[] memory needsFunding = abi.decode(performData, (address[]));
         _injectFunds(needsFunding);
         emit PerformedUpkeep(needsFunding);
