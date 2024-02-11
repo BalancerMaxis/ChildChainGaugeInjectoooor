@@ -56,13 +56,8 @@ KeeperCompatibleInterface
         uint256 maxInjectionAmount
     );
 
-    error ListLengthMismatch();
     error OnlyKeeper(address sender);
-    error DuplicateAddress(address duplicate);
-    error PeriodNotFinished(uint256 periodNumber, uint256 maxPeriods);
     error ZeroAddress();
-    error ZeroAmount();
-    error BalancesMismatch();
     error RewardTokenError();
     error RemoveNonexistentRecipient(address gaugeAddress);
     error ExceedsMaxInjectionAmount(
@@ -70,8 +65,8 @@ KeeperCompatibleInterface
         uint256 amountsPerPeriod,
         uint256 maxInjectionAmount
     );
-    error ExceedsWeeklySpend();
-    error ExceedsTotalInjectorProgramBudget();
+    error ExceedsWeeklySpend(uint256 weeklySpend);
+    error ExceedsTotalInjectorProgramBudget(uint256 totalDue);
     error InjectorNotDistributor(address gauge, address InjectTokenAddress);
 
     struct Target {
@@ -141,17 +136,17 @@ KeeperCompatibleInterface
 
     /**
      * @notice Injects funds into the gauges provided
-     * @param ready the list of gauges to fund (addresses must be pre-approved)
+     * @param targetAddresses the list of gauges to fund (addresses must be pre-approved)
      */
-    function _injectFunds(address[] memory ready) internal whenNotPaused {
+    function _injectFunds(address[] memory targetAddresses) internal whenNotPaused {
         uint256 minWaitPeriodSeconds = MinWaitPeriodSeconds;
         address tokenAddress = InjectTokenAddress;
         IERC20 token = IERC20(tokenAddress);
         uint256 balance = token.balanceOf(address(this));
         Target memory target;
-        for (uint256 idx = 0; idx < ready.length; idx++) {
-            target = GaugeConfigs[ready[idx]];
-            IChildChainGauge gauge = IChildChainGauge(ready[idx]);
+        for (uint256 idx = 0; idx < targetAddresses.length; idx++) {
+            target = GaugeConfigs[targetAddresses[idx]];
+            IChildChainGauge gauge = IChildChainGauge(targetAddresses[idx]);
             uint256 current_gauge_emissions_end = gauge
                 .reward_data(tokenAddress)
                 .period_finish;
@@ -163,11 +158,11 @@ KeeperCompatibleInterface
                 target.periodNumber < target.maxPeriods && // We have not already executed the last period
                 balance >= target.amountPerPeriod && // We have enough coins to pay
                 target.amountPerPeriod <= MaxInjectionAmount && //  We are not trying to inject more than the global max for 1 injection
-                target.isActive == true // The gauge marked active in the injector
+                target.isActive == true // The gauge is marked active in the injector
             ) {
                 SafeERC20.forceApprove(
                     token,
-                    ready[idx],
+                    targetAddresses[idx],
                     target.amountPerPeriod
                 );
 
@@ -177,12 +172,12 @@ KeeperCompatibleInterface
                     uint256(target.amountPerPeriod)
                 )
                 {
-                    GaugeConfigs[ready[idx]].lastInjectionTimestamp = uint56(
+                    GaugeConfigs[targetAddresses[idx]].lastInjectionTimestamp = uint56(
                         block.timestamp
                     );
-                    GaugeConfigs[ready[idx]].periodNumber++;
+                    GaugeConfigs[targetAddresses[idx]].periodNumber++;
                     emit EmissionsInjection(
-                        ready[idx],
+                        targetAddresses[idx],
                         tokenAddress,
                         target.amountPerPeriod
                     );
@@ -277,18 +272,18 @@ KeeperCompatibleInterface
             if (!update && GaugeConfigs[recipients[i]].isActive) {
                 executedPeriods = GaugeConfigs[recipients[i]].periodNumber;
             }
-            Target memory target;
+            Target memory target = GaugeConfigs[recipients[i]]; // Preserve lastInjectionTimestamp
             target.isActive = true;
             target.amountPerPeriod = amountPerPeriod;
             target.maxPeriods = maxPeriods;
+            target.periodNumber = 0;
             target.programStartTimestamp = doNotStartBeforeTimestamp;
-            // TODO Question - Should last run timestamp be reset on reconfig, or keep the last time the injector fired on this gauge
             GaugeConfigs[recipients[i]] = target;
             if (MaxGlobalAmountPerPeriod > 0 && MaxGlobalAmountPerPeriod < getWeeklySpend()) {
-                revert ExceedsWeeklySpend();
+                revert ExceedsWeeklySpend(getWeeklySpend());
             }
             if (MaxTotalDue > 0 && MaxTotalDue < getTotalDue()) {
-                revert ExceedsTotalInjectorProgramBudget();
+                revert ExceedsTotalInjectorProgramBudget(getTotalDue());
             }
 
             emit RecipientAdded(
