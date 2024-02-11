@@ -366,7 +366,9 @@ KeeperCompatibleInterface
 
      */
 
-
+    /**
+    * @notice Gets all current schedule information as a set of arrays
+    */
     function getFullSchedule() public view returns (address[] memory gauges, uint256[] memory amountsPerPeriod, uint8[] memory maxPeriods, uint56[] memory lastTimestamps, uint56[] memory doNotStartBeforeTimestamps) {
         gauges = getActiveGaugeList();
         uint len = gauges.length;
@@ -382,7 +384,7 @@ KeeperCompatibleInterface
     }
 
     /**
- * @notice Gets the total amount of tokens due to complete the program.
+     * @notice Gets the total amount of tokens due to complete the program.
      * @return totalDue The total amount of tokens required in the contract balance to pay out all programmed injections across all gauges.
      */
     function getTotalDue() public view returns (uint256 totalDue) {
@@ -394,7 +396,10 @@ KeeperCompatibleInterface
                 target.amountPerPeriod;
         }
     }
-
+    /**
+     * @notice Gets the total weekly spend
+     * @return weeklySpend  The total amopunt of tokens required to fulfil all active programs for 1 period.
+     */
     function getWeeklySpend() public view returns (uint256 weeklySpend){
         address[] memory gauges = getActiveGaugeList();
         for (uint256 i = 0; i < gauges.length; i++) {
@@ -569,10 +574,6 @@ KeeperCompatibleInterface
     function unpause() external onlyOwner {
         _unpause();
     }
-
-    /**
-     * @notice takes in a list of addresses and reverts if there is a duplicate
-     */
 
 
     modifier onlyKeeper() {
