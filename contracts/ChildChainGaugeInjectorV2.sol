@@ -158,8 +158,8 @@ KeeperCompatibleInterface
 
             if (
                 target.lastInjectionTimestamp + minWaitPeriodSeconds <= block.timestamp && // Not too recent based on minWaitPeriodSeconds
-                target.programStartTimestamp <= block.timestamp &&  // Not before prgoram start time
-                current_gauge_emissions_end <= block.timestamp && // This token is currently not streaming on this guage
+                target.programStartTimestamp <= block.timestamp &&  // Not before program start time
+                current_gauge_emissions_end <= block.timestamp && // This token is currently not streaming on this gauge
                 target.periodNumber < target.maxPeriods && // We have not already executed the last period
                 balance >= target.amountPerPeriod && // We have enough coins to pay
                 target.amountPerPeriod <= MaxInjectionAmount && //  We are not trying to inject more than the global max for 1 injection
@@ -381,6 +381,7 @@ KeeperCompatibleInterface
             lastTimestamps[i] = target.lastInjectionTimestamp;
             doNotStartBeforeTimestamps[i] = target.programStartTimestamp;
         }
+        return (gauges, amountsPerPeriod, maxPeriods, lastTimestamps, doNotStartBeforeTimestamps);
     }
 
     /**
@@ -395,6 +396,7 @@ KeeperCompatibleInterface
                 (target.maxPeriods - target.periodNumber) *
                 target.amountPerPeriod;
         }
+        return totalDue;
     }
     /**
      * @notice Gets the total weekly spend
@@ -408,6 +410,7 @@ KeeperCompatibleInterface
                 weeklySpend += target.amountPerPeriod;
             }
         }
+        return weeklySpend;
     }
 
     /**
