@@ -13,8 +13,8 @@ contract ChildChainGaugeInjectorV2Factory {
 
     address public implementation;
 
-    constructor() {
-        implementation = address(new ChildChainGaugeInjectorV2());
+    constructor(address logic) {
+        implementation = logic;
     }
 
     /**
