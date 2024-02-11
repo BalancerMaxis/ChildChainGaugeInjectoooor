@@ -85,12 +85,29 @@ KeeperCompatibleInterface
 
     EnumerableSet.AddressSet internal ActiveGauges;
     mapping(address => Target) internal GaugeConfigs;
-
+    /**
+    /* @notice The address that can call performUpkeep
+    */
     address public KeeperAddress;
+    /**
+    /* @notice The max amount any 1 schedule can inject in any one round
+    */
     uint256 public MaxInjectionAmount;
+    /**
+    /* @notice The max amount that cam be programmed fire over 1 run on all active periods, add will not work if this is exceed. 0 for unlimited.
+    */
     uint256 public MaxGlobalAmountPerPeriod;
+    /**
+    /* @notice The max total amount due over all active programs.  New program adds will not be allowed if they exceed this number.  0 for unlimited.
+    */
     uint256 public MaxTotalDue;
+    /**
+    /* @notice Regardless of other logic, wait at least this long  on each gauge between injections.
+    */
     uint256 public MinWaitPeriodSeconds;
+    /**
+    /* @notice The token this injector operates on.
+    */
     address public InjectTokenAddress;
 
 
@@ -302,8 +319,8 @@ KeeperCompatibleInterface
     /**
       * @notice Withdraws the contract balance
      */
-    function withdrawGasToken(address dest) external onlyOwner {
-        address payable recipient = payable(address);
+    function withdrawGasToken(address payable dest) external onlyOwner {
+        address payable recipient = dest;
         if (recipient == address(0)) {
             revert ZeroAddress();
         }
